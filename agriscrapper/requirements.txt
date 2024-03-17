@@ -1,0 +1,4 @@
+scrapy
+psycopg2-binary
+urllib
+python-dotenv
