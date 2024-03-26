@@ -12,7 +12,7 @@
 <br />
 <div align="center">
   <h3 align="center">
-    Kenya Agricultural Data Engineering, Analytics and AI Project (Kenya) - 2024
+    Kenya Agri-Insight Initiative: Harnessing Data for Agricultural Advancement (2024)- 2024
   </h3>
 </div>
 
@@ -52,8 +52,9 @@
 <!-- [![Product Name Screen Shot][product-screenshot]](https://example.com) -->
 This project aims to:
 
-1. Extract(scrape) `public` agricultural and climate data from government websites: 
-    - [https://amis.co.ke/]
+1. Extract(scrape) public agricultural and climate data from government websites: 
+    - [AMIS](https://amis.co.ke/)
+    - [Kenya National Bureau of Statistics](https://knbs.or.ke/visualizations/?page_id=3098)
 2. Load data into database lake --> data warehouse --> analytics database
 3. Use data to build machine learning models for agriculture forecasting.
 
@@ -137,8 +138,7 @@ Don't forget to give the project a star! Thanks again!
 
 #### Contributors: 
 
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+* John Elvis | [LinkedIn](https://www.linkedin.com/in/jelvis23/) | [Github](https://github.com/jonvis23)
 
 
 
