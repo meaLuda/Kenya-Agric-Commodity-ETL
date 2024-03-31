@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+  agriscrapper:
+    container_name: agriscrapper
+    build: ./agriscrapper/.
+    volumes:
+      - ./agriscrapper:/app
+    networks:
+      - agriscrapper_network
+    
+  etl_engine:
+    container_name: etl_engine
+    build: ./etl_engine/.
+    volumes:
+      - ./etl_engine:/app
+
+  dashboard:
+    container_name: dashboard
+    build: ./dashboard/.
+    volumes:
+      - ./dashboard:/app
+
+
+networks:
+  agriscrapper_network:
+    name: agriscrapper_network
+    driver: bridge
