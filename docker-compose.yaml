@@ -45,7 +45,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456#analytics_db_password
     volumes:
-      - ./data_lake_db_data:/var/lib/postgresql/data
+      - ./analytics_db_data:/var/lib/postgresql/data
     networks:
       - agriscrapper_network
 
