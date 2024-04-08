@@ -15,30 +15,34 @@ from dotenv import load_dotenv
 import logging
 
 
-dotenv_path = join(dirname(__file__), '.env')
-load_dotenv(dotenv_path)
+load_dotenv("/app/.env")
 
 # logg into a file
 # logging.basicConfig(filename='AgriscrapperPipeline_to_db.log', level=logging.INFO)
 
 DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD")
 DATABASE_HOST = os.environ.get("DATABASE_HOST")
+DATABASE_NAME = os.environ.get("DATABASE_NAME")
+DATABASE_USER = os.environ.get("DATABASE_USER")
+DATABASE_PORT = os.environ.get("DATABASE_PORT")
+
 
 class AgriscrapperPipeline:
     def __init__(self):
-        ## Connection Details
-        hostname = DATABASE_HOST
-        username = 'postgres'
-        password = DATABASE_PASSWORD
-        database = 'kemis_data_db'
+        # Connection Details
+        # Create/Connect to database
+        self.connection = psycopg2.connect(
+            host=DATABASE_HOST,
+            user=DATABASE_USER,
+            password=DATABASE_PASSWORD,
+            dbname=DATABASE_NAME,
+            port=DATABASE_PORT
+        )
 
-        ## Create/Connect to database
-        self.connection = psycopg2.connect(host=hostname, user=username, password=password, dbname=database)
-        
-        ## Create cursor, used to execute commands
+        # Create cursor, used to execute commands
         self.cur = self.connection.cursor()
-        
-        ## Create quotes table if none exists
+
+        # Create quotes table if none exists
         self.cur.execute("""
         CREATE TABLE IF NOT EXISTS agriscrapper_data (
             id SERIAL PRIMARY KEY,
@@ -54,7 +58,7 @@ class AgriscrapperPipeline:
             date TEXT NULL
         );
         """)
-    
+
     def process_item(self, item, spider):
         # Define the select statement to check for existing entry
         # This prevents double entry from being created by our scraper
@@ -116,4 +120,3 @@ class AgriscrapperPipeline:
         # Close the cursor and connection
         self.cur.close()
         self.connection.close()
-
