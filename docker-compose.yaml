@@ -9,14 +9,6 @@ services:
     networks:
       - agriscrapper_network
     
-  etl_engine:
-    container_name: etl_engine
-    build: ./etl_engine/.
-    volumes:
-      - ./etl_engine:/app
-    networks:
-      - agriscrapper_network
-
   dashboard:
     container_name: dashboard
     build: ./dashboard/.

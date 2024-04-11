@@ -33,11 +33,20 @@ class AgriscrapperPipeline:
         database = 'kemis_data_db'
 
         ## Create/Connect to database
-        self.connection = psycopg2.connect(host=hostname, user=username, password=password, dbname=database)
-        
-        ## Create cursor, used to execute commands
+        self.connection = psycopg2.connect(host=hostname, user=username, password=password)
+        self.connection.autocommit = True  # Set autocommit mode
         self.cur = self.connection.cursor()
-        
+
+        # Check if the database exists, and create it if it doesn't
+        self.cur.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s", (database,))
+        if not self.cur.fetchone():
+            self.cur.execute(f'CREATE DATABASE {database}')
+
+        # Now connect to the newly created database
+        self.connection.close()
+        self.connection = psycopg2.connect(host=hostname, user=username, password=password, dbname=database)
+        self.cur = self.connection.cursor()
+
         ## Create quotes table if none exists
         self.cur.execute("""
         CREATE TABLE IF NOT EXISTS agriscrapper_data (
