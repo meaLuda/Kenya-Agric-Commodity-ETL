@@ -1,0 +1,5 @@
+sources:
+  - name: amis
+    schema: public
+    tables:
+      - name: agriscrapper_data
