@@ -1,8 +1,8 @@
 with refined_commodities as (
     select
         id as commodity_id,
+
         commodity,
-        supply_volume::numeric as supply_volume,
         
         case 
             when classification = '-' or classification is null then 'not applicable' 
@@ -28,6 +28,7 @@ with refined_commodities as (
             when split_part(wholesale, '/', 2) = ' - ' then null
             else split_part(wholesale, '/', 2)
         end as wholesale_unit,   
+
         case 
             when split_part(retail, '/', 1) = ' - ' then null
             else split_part(retail, '/', 1)::numeric 
@@ -38,12 +39,17 @@ with refined_commodities as (
             else split_part(retail, '/', 2) 
         end as retail_unit,  
 
+        supply_volume::numeric as supply_volume,
+
+        market,
+
         county,
+
         date::date as date
 
     from 
         {{ref('stg_amis__commodities')}}
 )
 
-select * from refined_commodities;
+select * from refined_commodities
      
