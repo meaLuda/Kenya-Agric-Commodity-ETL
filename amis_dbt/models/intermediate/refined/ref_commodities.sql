@@ -49,6 +49,8 @@ with refined_commodities as (
 
     from 
         {{ref('stg_amis__commodities')}}
+
+    where county != 'test'
 )
 
 select * from refined_commodities
