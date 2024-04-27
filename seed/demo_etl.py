@@ -51,6 +51,12 @@ def load_data_into_tables(data_file, conn):
     insert_fact_table(conn, df)
 
 def extract_value_and_unit(value):
+    """
+        uses regular expressions to extract the numeric value and the unit of measurement from the wholesale and retail columns.
+        regular expression pattern r"(\d+(\.\d+)?)\s*(/?\w+)?" matches a numeric value followed by an optional unit. 
+        It captures the numeric value and the unit (if present) as separate groups.
+        If no unit is provided, the default unit 'No Unit' is used.
+    """
     if isinstance(value, str):
         pattern = r"(\d+(\.\d+)?)\s*(/?\w+)?"
         match = re.match(pattern, value)
