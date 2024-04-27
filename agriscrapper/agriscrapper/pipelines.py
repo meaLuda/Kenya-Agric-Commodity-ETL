@@ -23,14 +23,19 @@ load_dotenv(dotenv_path)
 
 DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD")
 DATABASE_HOST = os.environ.get("DATABASE_HOST")
+DATABASE_NAME = os.environ.get("DATABASE_NAME")
+DATABASE_USER = os.environ.get("DATABASE_USER")
+DATABASE_PORT = os.environ.get("DATABASE_PORT")
+
+
 
 class AgriscrapperPipeline:
     def __init__(self):
         ## Connection Details
         hostname = DATABASE_HOST
-        username = 'postgres'
+        username = DATABASE_USER
         password = DATABASE_PASSWORD
-        database = 'kemis_data_db'
+        database = DATABASE_NAME
 
         ## Create/Connect to database
         self.connection = psycopg2.connect(host=hostname, user=username, password=password)
