@@ -9,19 +9,13 @@ services:
     networks:
       - agriscrapper_network
     
-  etl_engine:
-    container_name: etl_engine
-    build: ./etl_engine/.
-    volumes:
-      - ./etl_engine:/app
-    networks:
-      - agriscrapper_network
-
   dashboard:
     container_name: dashboard
     build: ./dashboard/.
     volumes:
       - ./dashboard:/app
+    ports:
+      - '3000:3000'
     networks:
       - agriscrapper_network
 
@@ -32,6 +26,10 @@ services:
       POSTGRES_DB: data_lake
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456#data_lake_db_password
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./data_lake_db_data:/var/lib/postgresql/data
     networks:
       - agriscrapper_network
 
@@ -42,6 +40,10 @@ services:
       POSTGRES_DB: analytics
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456#analytics_db_password
+    ports:
+      - '5433:5432'
+    volumes:
+      - ./analytics_db_data:/var/lib/postgresql/data
     networks:
       - agriscrapper_network
 
