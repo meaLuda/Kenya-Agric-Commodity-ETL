@@ -12,5 +12,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy your Scrapy project into the container
 COPY . .
 
+
 # Set the command to run your Scrapy spider
 CMD ["scrapy", "crawl", "kemis_commodities_scrapper"]

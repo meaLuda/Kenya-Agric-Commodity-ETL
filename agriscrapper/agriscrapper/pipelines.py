@@ -15,8 +15,7 @@ from dotenv import load_dotenv
 import logging
 
 
-dotenv_path = join(dirname(__file__), '.env')
-load_dotenv(dotenv_path)
+load_dotenv("/app/.env")
 
 # logg into a file
 # logging.basicConfig(filename='AgriscrapperPipeline_to_db.log', level=logging.INFO)
@@ -28,31 +27,22 @@ DATABASE_USER = os.environ.get("DATABASE_USER")
 DATABASE_PORT = os.environ.get("DATABASE_PORT")
 
 
-
 class AgriscrapperPipeline:
     def __init__(self):
-        ## Connection Details
-        hostname = DATABASE_HOST
-        username = DATABASE_USER
-        password = DATABASE_PASSWORD
-        database = DATABASE_NAME
+        # Connection Details
+        # Create/Connect to database
+        self.connection = psycopg2.connect(
+            host=DATABASE_HOST,
+            user=DATABASE_USER,
+            password=DATABASE_PASSWORD,
+            dbname=DATABASE_NAME,
+            port=DATABASE_PORT
+        )
 
-        ## Create/Connect to database
-        self.connection = psycopg2.connect(host=hostname, user=username, password=password)
-        self.connection.autocommit = True  # Set autocommit mode
+        # Create cursor, used to execute commands
         self.cur = self.connection.cursor()
 
-        # Check if the database exists, and create it if it doesn't
-        self.cur.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s", (database,))
-        if not self.cur.fetchone():
-            self.cur.execute(f'CREATE DATABASE {database}')
-
-        # Now connect to the newly created database
-        self.connection.close()
-        self.connection = psycopg2.connect(host=hostname, user=username, password=password, dbname=database)
-        self.cur = self.connection.cursor()
-
-        ## Create quotes table if none exists
+        # Create quotes table if none exists
         self.cur.execute("""
         CREATE TABLE IF NOT EXISTS agriscrapper_data (
             id SERIAL PRIMARY KEY,
@@ -68,7 +58,7 @@ class AgriscrapperPipeline:
             date TEXT NULL
         );
         """)
-    
+
     def process_item(self, item, spider):
         # Define the select statement to check for existing entry
         # This prevents double entry from being created by our scraper
@@ -130,4 +120,3 @@ class AgriscrapperPipeline:
         # Close the cursor and connection
         self.cur.close()
         self.connection.close()
-
