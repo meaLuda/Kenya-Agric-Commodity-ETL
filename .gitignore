@@ -4,3 +4,4 @@ env
 postgres-db-volume
 data_lake_db_data
 analytics_db_data
+.dbt
