@@ -1,0 +1,12 @@
+amis_dbt:
+  outputs:
+    dev:
+      dbname: amis
+      host: XXXXXX
+      pass: XXXXXX
+      port: XXXXXX
+      schema: analytics
+      threads: 1
+      type: postgres
+      user: dbt
+  target: dev

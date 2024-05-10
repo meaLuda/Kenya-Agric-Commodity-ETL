@@ -17,7 +17,7 @@ def is_valid_url(url):
 
 def url_list():
     url_list = []
-    for product_number in range(1,500):
+    for product_number in range(1,7000):
         url = f'https://amis.co.ke/index.php/site/market?product={product_number}&per_page=3000'
         if is_valid_url(url):
             url_list.append(url)
