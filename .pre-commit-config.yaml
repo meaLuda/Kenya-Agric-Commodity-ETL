@@ -1,0 +1,14 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-xml
+      - id: check-yaml
+        exclude: ^venv/
+      - id: file-contents-sorter
+      #- id: check-added-large-files
+      - id: file-contents-sorter

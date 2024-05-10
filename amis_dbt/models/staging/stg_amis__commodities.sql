@@ -1,4 +1,4 @@
-select 
+select
     id,
     commodity,
     classification,
@@ -11,4 +11,4 @@ select
     county,
     date
 from
-    {{source('amis','agriscrapper_data')}}
+    {{ source('amis','agriscrapper_data') }}

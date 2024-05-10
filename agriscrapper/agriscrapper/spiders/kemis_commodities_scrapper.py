@@ -2,6 +2,8 @@ import scrapy
 import logging
 import requests
 from agriscrapper.items import AgriscrapperItem
+
+
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
 }
@@ -15,23 +17,29 @@ def is_valid_url(url):
     except requests.RequestException:
         return False
 
+
 def url_list():
     url_list = []
+<<<<<<< HEAD
     for product_number in range(1,7000):
+=======
+    for product_number in range(1, 500):
+>>>>>>> 4ebe2dc ({update:} Added pre-commit hooks)
         url = f'https://amis.co.ke/index.php/site/market?product={product_number}&per_page=3000'
         if is_valid_url(url):
             url_list.append(url)
-    
+
     return url_list
 
 # log file
 # logging.basicConfig(filename='kemis_commodities_scrapper.log', level=logging.INFO)
 
+
 class KemisCommoditiesScrapperSpider(scrapy.Spider):
     name = "kemis_commodities_scrapper"
     allowed_domains = ["amis.co.ke"]
     url = 'https://amis.co.ke/index.php/site/market?product={}&per_page=3000'
-    
+
     def start_requests(self):
         for product_number in range(1, 600):
             yield scrapy.Request(url=self.url.format(product_number), callback=self.parse)
@@ -39,7 +47,8 @@ class KemisCommoditiesScrapperSpider(scrapy.Spider):
     def parse(self, response):
         # Extract items from the current page
 
-        rows = response.xpath('//table[@class="table table-bordered table-condensed"]/tbody/tr')
+        rows = response.xpath(
+            '//table[@class="table table-bordered table-condensed"]/tbody/tr')
         item = AgriscrapperItem()
         # Loop through each row in the table from the response
         for row in rows:
@@ -57,7 +66,6 @@ class KemisCommoditiesScrapperSpider(scrapy.Spider):
 
             yield item
 
-
         # pagination = response.css('.pagination ::attr(href)').getall()
         # # log items in pagination
         # logging.info(pagination)
@@ -66,4 +74,3 @@ class KemisCommoditiesScrapperSpider(scrapy.Spider):
         #         # check if its a valid url
         #         if is_valid_url(url):
         #             yield response.follow(url, callback=self.parse)
-                
