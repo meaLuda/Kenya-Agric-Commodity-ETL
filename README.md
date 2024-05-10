@@ -17,6 +17,7 @@
       <a href="#about-the-project">About The Project</a>
       <ul>
         <li><a href="#built-with">Built With</a></li>
+        <li><a href="#need-to-knows">Need To Knows</a></li>
       </ul>
     </li>
     <li>
@@ -57,7 +58,11 @@ This project aims to:
 
 ### Built With
 
-
+* [Docker](https://docs.docker.com/build/cloud/?_gl=1*123v2zw*_ga*NjQwMTA4NjM5LjE3MTQ3NzU5MDM.*_ga_XJWPQMJYHQ*MTcxNTMyNzUyOS40LjEuMTcxNTMyNzU1Ni4zMy4wLjA.)
+* [Python3](https://www.python.org/downloads/)
+* [DBT](https://docs.getdbt.com/docs/introduction)
+* [PostgreSQL](https://www.postgresql.org/)
+* [Git](https://git-scm.com/doc)
 
 
 
