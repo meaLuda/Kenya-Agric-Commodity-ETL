@@ -15,10 +15,12 @@ from dotenv import load_dotenv
 import logging
 
 
-load_dotenv("/app/.env")
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+
 
 # logg into a file
-# logging.basicConfig(filename='AgriscrapperPipeline_to_db.log', level=logging.INFO)
+logging.basicConfig(filename='AgriscrapperPipeline_to_db.log', level=logging.INFO)
 
 DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD")
 DATABASE_HOST = os.environ.get("DATABASE_HOST")

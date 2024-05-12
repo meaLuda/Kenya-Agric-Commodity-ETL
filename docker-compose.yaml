@@ -19,11 +19,11 @@ services:
     networks:
       - agriscrapper_network
 
-  data_lake_db:
+  db:
     container_name: data_lake_db
     image: postgres:13-alpine
     environment:
-      POSTGRES_DB: data_lake
+      POSTGRES_DB: kemis_data_db,data_warehouse
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456#data_lake_db_password
     ports:
@@ -33,19 +33,6 @@ services:
     networks:
       - agriscrapper_network
 
-  analytics_db:
-    container_name: analytics_db
-    image: postgres:13-alpine
-    environment:
-      POSTGRES_DB: analytics
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123456#analytics_db_password
-    ports:
-      - '5433:5432'
-    volumes:
-      - ./analytics_db_data:/var/lib/postgresql/data
-    networks:
-      - agriscrapper_network
 
 networks:
   agriscrapper_network:
