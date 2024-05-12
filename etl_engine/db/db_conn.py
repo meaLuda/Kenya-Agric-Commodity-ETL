@@ -40,5 +40,3 @@ def connect(db_type="DataLake"):
         if conn is not None:
             conn.close()
             logging.info('------------ > Database connection closed. < ------------ ')
-
-

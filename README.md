@@ -44,7 +44,7 @@
 <!-- [![Product Name Screen Shot][product-screenshot]](https://example.com) -->
 This project aims to:
 
-1. Extract(scrape) public agricultural and climate data from government websites: 
+1. Extract(scrape) public agricultural and climate data from government websites:
     - [AMIS](https://amis.co.ke/)
     - [Kenya National Bureau of Statistics](https://knbs.or.ke/visualizations/?page_id=3098)
 2. Load data into database lake --> data warehouse --> analytics database
@@ -128,11 +128,11 @@ Don't forget to give the project a star! Thanks again!
 <!-- LICENSE -->
 ## License
 
-#### Project Lead: 
+#### Project Lead:
 * Github - [Munyala Eliud](https://github.com/meaLuda)
 * Linkedin - [Eliud Munyala](https://www.linkedin.com/in/eliud-munyala)
 
-#### Contributors: 
+#### Contributors:
 
 * John Elvis | [LinkedIn](https://www.linkedin.com/in/jelvis23/) | [Github](https://github.com/jonvis23)
 
@@ -143,7 +143,7 @@ Don't forget to give the project a star! Thanks again!
 
 Munyala Eliud - munyalamea@gmail.com
 
-Project Link: 
+Project Link:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -159,7 +159,3 @@ Project Link:
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-

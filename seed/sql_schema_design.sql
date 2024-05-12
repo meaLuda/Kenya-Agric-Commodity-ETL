@@ -1,9 +1,9 @@
 
--- The fact_market_prices table is the central fact table, containing the numerical measures 
+-- The fact_market_prices table is the central fact table, containing the numerical measures
 -- (wholesale price, retail price, supply volume) and foreign key references to the dimension tables.
--- The dimension tables (dim_commodity, dim_market, dim_grade, dim_sex, dim_county, dim_date) 
+-- The dimension tables (dim_commodity, dim_market, dim_grade, dim_sex, dim_county, dim_date)
 -- store the descriptive attributes related to the fact data.
--- This design allows for efficient querying and filtering based on the dimensions, 
+-- This design allows for efficient querying and filtering based on the dimensions,
 -- as well as performing aggregations and analytical operations on the numerical measures in the fact table.
 
 

@@ -72,7 +72,7 @@ home_page_content = dbc.Container(
                                             ),
                                             html.A("LinkedIn: ", href="https://www.linkedin.com/in/eliud-munyala/", target="_blank", className="mr-1"),
                                             # breakline
-                                            html.Br(),                                            
+                                            html.Br(),
                                             html.A("Twitter", href="https://www.twitter.com/member2", target="_blank", className="mr-1"),
                                         ]
                                     ),
@@ -81,7 +81,7 @@ home_page_content = dbc.Container(
                             ),
                             width=4,
                         ),
-                
+
                     ]
                 ),
             ]
