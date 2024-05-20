@@ -8,70 +8,69 @@
 
 
 
--- Fact Table
-
-CREATE TABLE fact_market_prices (
-    id SERIAL PRIMARY KEY,
-    commodity_id INT,
-    classification VARCHAR(50),
-    grade VARCHAR(50),
-    sex VARCHAR(10),
-    market_id INT,
-    wholesale_price DECIMAL(10, 2),
-    wholesale_unit DECIMAL(10, 2),
-    retail_price DECIMAL(10, 2),
-    retail_unit DECIMAL(10, 2),
-    supply_volume INT,
-    county_id INT,
-    date_id INT,
-    FOREIGN KEY (commodity_id) REFERENCES dim_commodity(commodity_id),
-    FOREIGN KEY (market_id) REFERENCES dim_market(market_id),
-    FOREIGN KEY (grade_id) REFERENCES dim_grade(grade_id),
-    FOREIGN KEY (sex_id) REFERENCES dim_sex(sex_id),
-    FOREIGN KEY (date_id) REFERENCES dim_date(date_id),
-    FOREIGN KEY (county_id) REFERENCES dim_county(county_id)
-);
-
 -- Dimensions table
-
 -- Commodity Dimension
 CREATE TABLE dim_commodity (
-    commodity_id SERIAL PRIMARY KEY,
-    commodity_name VARCHAR(50)
+    commodity_sk SERIAL PRIMARY KEY,
+    commodity_name VARCHAR(50) NOT NULL
 );
 
 -- Market Dimension
 CREATE TABLE dim_market (
-    market_id SERIAL PRIMARY KEY,
-    market_name VARCHAR(100)
+    market_sk SERIAL PRIMARY KEY,
+    market_name VARCHAR(100) NOT NULL
 );
 
 -- Grade Dimension
 CREATE TABLE dim_grade (
-    grade_id SERIAL PRIMARY KEY,
-    grade_name VARCHAR(50)
+    grade_sk SERIAL PRIMARY KEY,
+    grade_name VARCHAR(50) NOT NULL
 );
 
 -- Sex Dimension
 CREATE TABLE dim_sex (
-    sex_id SERIAL PRIMARY KEY,
-    sex_name VARCHAR(10)
+    sex_sk SERIAL PRIMARY KEY,
+    sex_name VARCHAR(10) NOT NULL
 );
 
 -- County Dimension
 CREATE TABLE dim_county (
-    county_id SERIAL PRIMARY KEY,
-    county_name VARCHAR(50)
+    county_sk SERIAL PRIMARY KEY,
+    county_name VARCHAR(50) NOT NULL
 );
 
 -- Date Dimension
 CREATE TABLE dim_date (
-    date_id SERIAL PRIMARY KEY,
-    date DATE,
-    year INT,
-    month INT,
-    day INT,
-    quarter INT,
-    week INT,
-    fiscal_year INT
+    date_sk SERIAL PRIMARY KEY,
+    date DATE NOT NULL,
+    year INT NOT NULL,
+    month INT NOT NULL,
+    day INT NOT NULL,
+    quarter INT NOT NULL,
+    week INT NOT NULL,
+    fiscal_year INT NOT NULL
 );
+
+-- Fact Table
+CREATE TABLE fact_market_prices (
+    id SERIAL PRIMARY KEY,
+    commodity_sk INT NOT NULL,
+    grade_sk INT NOT NULL,
+    sex_sk INT NOT NULL,
+    market_sk INT NOT NULL,
+    wholesale_price NUMERIC(10, 2) NOT NULL,
+    retail_price NUMERIC(10, 2) NOT NULL,
+    supply_volume INT NOT NULL,
+    county_sk INT NOT NULL,
+    date_sk INT NOT NULL,
+    FOREIGN KEY (commodity_sk) REFERENCES dim_commodity(commodity_sk),
+    FOREIGN KEY (market_sk) REFERENCES dim_market(market_sk),
+    FOREIGN KEY (grade_sk) REFERENCES dim_grade(grade_sk),
+    FOREIGN KEY (sex_sk) REFERENCES dim_sex(sex_sk),
+    FOREIGN KEY (date_sk) REFERENCES dim_date(date_sk),
+    FOREIGN KEY (county_sk) REFERENCES dim_county(county_sk)
+);
+
+-- Indexes (example)
+CREATE INDEX idx_fact_market_prices_date ON fact_market_prices (date_sk);
+CREATE INDEX idx_fact_market_prices_county ON fact_market_prices (county_sk);
