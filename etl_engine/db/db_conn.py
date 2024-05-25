@@ -59,31 +59,31 @@ def create_tables():
         """
         CREATE TABLE IF NOT EXISTS dim_commodity (
             id SERIAL PRIMARY KEY,
-            commodity_name VARCHAR(50) NOT NULL
+            commodity VARCHAR(50) NOT NULL
         )
         """,
         """
         CREATE TABLE IF NOT EXISTS dim_market (
             id SERIAL PRIMARY KEY,
-            market_name VARCHAR(100) NOT NULL
+            market VARCHAR(100) NOT NULL
         )
         """,
         """
         CREATE TABLE IF NOT EXISTS dim_grade (
             id SERIAL PRIMARY KEY,
-            grade_name VARCHAR(50) NOT NULL
+            grade VARCHAR(50) NOT NULL
         )
         """,
         """
         CREATE TABLE IF NOT EXISTS dim_sex (
             id SERIAL PRIMARY KEY,
-            sex_name VARCHAR(10) NOT NULL
+            sex VARCHAR(10) NOT NULL
         )
         """,
         """
         CREATE TABLE IF NOT EXISTS dim_county (
             id SERIAL PRIMARY KEY,
-            county_name VARCHAR(50) NOT NULL
+            county VARCHAR(50) NOT NULL
         )
         """,
         """
@@ -107,6 +107,7 @@ def create_tables():
             market_sk INT NOT NULL,
             wholesale_price NUMERIC(10, 2) NOT NULL,
             retail_price NUMERIC(10, 2) NOT NULL,
+            price_unit_wr VARCHAR(20) NOT NULL,
             supply_volume INT NOT NULL,
             county_sk INT NOT NULL,
             date_sk INT NOT NULL,

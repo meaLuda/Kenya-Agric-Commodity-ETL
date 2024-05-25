@@ -39,6 +39,3 @@ def extract_data():
         # Close the database connection
         cursor.close()
         connection.close()
-
-
-print("hello")
