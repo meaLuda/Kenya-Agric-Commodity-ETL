@@ -1,2 +1,9 @@
 dash
 pandas
+dash-core-components
+dash-html-components
+dash-bootstrap-components
+pandas
+plotly
+sqlalchemy
+psycopg2-binary
