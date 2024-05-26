@@ -2,18 +2,20 @@ import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html
 import dash
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
-from db import connect
 from sqlalchemy import create_engine
+import logging
+import plotly.graph_objects as go
+
 
 from dash.dependencies import Input, Output
 from pages.data_sources import sources
-from pages.home import home_page
+from pages.home import home_page,map_page
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -40,7 +42,7 @@ CONTENT_STYLE = {
 
 sidebar = html.Div(
     [
-        html.H4("Kenya Agriculture Insights", className="display-4 ml-3 mt-4 mb-4"),
+        html.P("Kenya Agriculture Commodity Insights", className="display-4 ml-3 mt-4 mb-4"),
         html.Hr(),
         html.P(
             "An extensive analytics dashboard using "
@@ -51,7 +53,7 @@ sidebar = html.Div(
             [
                 dbc.NavLink("Home", href="/", active="exact"),
                 dbc.NavLink("Data Sources", href="/d_sources", active="exact"),
-                dbc.NavLink("Map", href="/map", active="exact"),
+                dbc.NavLink("About", href="/About", active="exact"),
                 dbc.NavLink("Summary Report", href="/Summary Analytics", active="exact"),
             ],
             vertical=True,
@@ -65,7 +67,7 @@ sidebar = html.Div(
 content = html.Div(id="page-content", style=CONTENT_STYLE)
 # Database connection
 # engine = create_engine('postgresql://username:password@localhost:5432/yourdatabase')
-engine = create_engine('postgresql://postgres:RQaoNj7QEDxq@localhost:5432/Kemis_analytics_db')
+engine = create_engine('postgresql://postgres:RQaoNj7QEDxq@localhost:5433/Kemis_analytics_db')
 
 # Toggle button to show/hide sidebar
 toggle_button = html.Button(
@@ -90,11 +92,11 @@ def toggle_sidebar(n):
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def render_page_content(pathname):
     if pathname == "/":
-        return home_page.home_page_content
+        return map_page.map_view
     elif pathname == "/d_sources":
         return sources.data_sources_content
-    elif pathname == "/map":
-        return html.P("Oh cool, this is page 2!")
+    elif pathname == "/About":
+        return home_page.home_page_content
     # If the user tries to reach a different page, return a 404 message
     return html.Div(
         [
@@ -127,31 +129,43 @@ def set_market_options(search_value):
     options = [{'label': row['market'], 'value': row['id']} for idx, row in df.iterrows()]
     return options
 
-# Callback to update the map based on selections
+# Callback to update the time series chart based on selections
 @app.callback(
-    Output('kenya-map', 'figure'),
+    Output('kenya-timeseries', 'figure'),
     [Input('commodity-dropdown', 'value'),
      Input('market-dropdown', 'value'),
      Input('date-picker-range', 'start_date'),
      Input('date-picker-range', 'end_date')]
 )
-def update_map(commodity_id, market_id, start_date, end_date):
+def update_timeseries(commodity_id, market_id, start_date, end_date):
+    print(f"Variables Incoming: \n Commodity id: {commodity_id} Market id: {market_id}\
+                  \n Start date: {start_date} End date: {end_date}")
+
+    if not commodity_id or not market_id or not start_date or not end_date:
+        # Return an empty figure if any of the inputs are not provided
+        return go.Figure()
+
     query = f"""
-    SELECT mp.wholesale_price, mp.retail_price, cg.latitude, cg.longitude, m.market, c.county
+    SELECT dd.date, mp.wholesale_price, mp.retail_price, dm.market, dc.county
     FROM fact_market_prices mp
     JOIN dim_commodity dcom ON mp.commodity_sk = dcom.id
     JOIN dim_market dm ON mp.market_sk = dm.id
     JOIN dim_county dc ON mp.county_sk = dc.id
-    JOIN county_goe cg ON dc.id = cg.county_sk
-    WHERE dcom.id = {commodity_id} AND dm.id = {market_id} AND mp.date_sk BETWEEN '{start_date}' AND '{end_date}'
+    JOIN dim_date dd ON mp.date_sk = dd.id
+    WHERE dcom.id = {commodity_id} AND dm.id = {market_id} AND dd.date BETWEEN '{start_date}' AND '{end_date}'
+    ORDER BY dd.date
     """
     df = pd.read_sql(query, engine)
-
-    fig = px.scatter_mapbox(df, lat='latitude', lon='longitude', hover_name='market',
-                            hover_data={'wholesale_price': True, 'retail_price': True, 'county': True},
-                            zoom=5, height=600)
-    fig.update_layout(mapbox_style="open-street-map")
+    print(df.head())
+    market = df['market'][0]
+    fig = px.line(df, x='date', y=['wholesale_price', 'retail_price'],
+                  labels={'value': 'Price', 'variable': 'Price Type'},
+                  title=f'Time Series of Prices for Commodity {commodity_id} in Market {market}')
+    fig.update_layout(xaxis_title='Date', yaxis_title='Price')
     return fig
+
+
+
 
 
 if __name__ == "__main__":

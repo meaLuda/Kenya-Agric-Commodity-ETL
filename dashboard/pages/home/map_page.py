@@ -8,18 +8,25 @@ CARD_STYLE = {
     "border-radius": "5px",
 }
 
-
-
-map_page = dbc.Container([
+map_view = dbc.Container([
+    dbc.Row([
+        dbc.Col(html.H1("Kenyan Market Prices Time Series", className="text-center"), width=12),
+        dbc.Col(html.Div(className="my-4"), width=12)
+    ]),
     dbc.Row([
         dbc.Col([
-            html.H1("Kenyan Market Prices Map"),
-            dcc.Dropdown(id='commodity-dropdown', placeholder='Select Commodity'),
-            dcc.Dropdown(id='market-dropdown', placeholder='Select Market'),
-            dcc.DatePickerRange(id='date-picker-range')
-        ], width=4),
+            dcc.Dropdown(id="commodity-dropdown", placeholder="Select Commodity", style={"width": "100%"}),
+        ], width=3, className="mb-2"),
         dbc.Col([
-            dcc.Graph(id='kenya-map')
-        ], width=8)
+            dcc.Dropdown(id="market-dropdown", placeholder="Select Market", style={"width": "100%"}),
+        ], width=3, className="mb-2"),
+        dbc.Col([
+            dcc.DatePickerRange(id="date-picker-range", style={"width": "100%"}),
+        ], width=6, className="mb-2"),
+    ]),
+    dbc.Row([
+        dbc.Col([
+            dcc.Graph(id="kenya-timeseries")
+        ], width=12)
     ])
-])
+], fluid=True)

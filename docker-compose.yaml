@@ -27,7 +27,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456#data_lake_db_password
     ports:
-      - '5432:5432'
+      - '5433:5432'
     volumes:
       - ./data_lake_db_data:/var/lib/postgresql/data
     networks:
