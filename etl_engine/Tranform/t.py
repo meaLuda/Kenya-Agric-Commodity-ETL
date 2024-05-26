@@ -1,6 +1,12 @@
 import pandas as pd
 import logging
 from datetime import datetime
+from datetime import datetime
+from geopy.geocoders import Nominatim,GoogleV3
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
+import time
+import random
+
 
 
 def get_id(conn, table_name, column_name, value):
@@ -18,7 +24,28 @@ def get_id(conn, table_name, column_name, value):
     cursor.close()
     return result[0] if result else None
 
+def geocode_address(location: str, retries=3):
+    logging.info(f"Location to search: {location}")
 
+    # Initialize the geolocator with a user_agent and timeout
+    geolocator = Nominatim(user_agent="Farme Data", timeout=10)
+    try:
+        geoLoc = geolocator.geocode(location)
+        if geoLoc:
+            logging.info(f"Output Address: {geoLoc.address}")
+            logging.info(f"Output latitude: {geoLoc.latitude}")
+            logging.info(f"Output longitude: {geoLoc.longitude}")
+            return geoLoc.address, geoLoc.latitude, geoLoc.longitude
+        else:
+            logging.warning(f"Geocoding failed for location: {location}")
+            return None, None, None
+    except (GeocoderTimedOut, GeocoderServiceError) as e:
+        if retries > 0:
+            time.sleep(2 + random.uniform(0, 1))  # Adding a random delay to avoid rate limiting
+            return geocode_address(location, retries - 1)
+        else:
+            logging.error(f"Geocoding failed for location: {location} with error: {e}")
+            return None, None, None
 
 def transform_data_into_tables(data, conn):
     data = pd.DataFrame.from_dict([data])
@@ -38,7 +65,8 @@ def transform_data_into_tables(data, conn):
     if wholesale_unit == retail_unit:
         data['price_unit_wr'] = wholesale_unit
 
-
+    # Remove the word 'market' from the 'market' column
+    data['market'] = data['market'].str.replace('market', '', case=False).str.strip()
     # # Create separate DataFrames for each dimension table
     dim_commodity = data[['commodity']]
     dim_market =  data[['market']]
@@ -46,7 +74,7 @@ def transform_data_into_tables(data, conn):
     dim_sex =  data[['sex']]
     dim_county =  data[['county']]
 
-    # Extract unique dates and create the date dimension table
+    # # Extract unique dates and create the date dimension table
     data['year'] = data['date'].dt.year
     data['month'] = data['date'].dt.month
     data['day'] = data['date'].dt.day
@@ -64,6 +92,10 @@ def transform_data_into_tables(data, conn):
 
     ## Insert data into the fact table
     insert_fact_table(conn, data)
+
+    ## Geocode addresses and insert into goe tables
+    insert_geocoded_data(conn, data)
+    time.sleep(3)
 
 
 def extract_value_and_unit(value):
@@ -139,3 +171,43 @@ def insert_fact_table(conn, df):
 
     conn.commit()
     cursor.close()
+
+
+def insert_geocoded_data(conn, df):
+    logging.info("------------ Geocoding and Inserting into goe Tables  --------------------------")
+
+    county_goe_rows = []
+    market_goe_rows = []
+
+    for index, row in df.iterrows():
+        county_sk = get_id(conn, 'dim_county', 'county', row['county'])
+        market_sk = get_id(conn, 'dim_market', 'market', row['market'])
+
+        # Geocode the addresses
+        county_address, county_lat, county_lon = geocode_address(row['county'])
+        market_address, market_lat, market_lon = geocode_address(row['market'])
+        if county_lat is not None and county_lon is not None:
+            county_goe_rows.append((county_sk, county_address, county_lat, county_lon))
+
+        if market_lat is not None and market_lon is not None:
+            market_goe_rows.append((market_sk, market_address, market_lat, market_lon))
+
+    # # Insert into county_goe table
+    if county_goe_rows:
+        cursor = conn.cursor()
+        placeholders = ', '.join(['%s'] * len(county_goe_rows[0]))
+        query = f"INSERT INTO county_goe (county_sk, Address, Latitude, Longitude) VALUES ({placeholders})"
+        for values in county_goe_rows:
+            cursor.execute(query, values)
+        conn.commit()
+        cursor.close()
+
+    # # Insert into market_goe table
+    if market_goe_rows:
+        cursor = conn.cursor()
+        placeholders = ', '.join(['%s'] * len(market_goe_rows[0]))
+        query = f"INSERT INTO market_goe (market_sk, Address, Latitude, Longitude) VALUES ({placeholders})"
+        for values in market_goe_rows:
+            cursor.execute(query, values)
+        conn.commit()
+        cursor.close()

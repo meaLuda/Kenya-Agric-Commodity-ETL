@@ -7,7 +7,7 @@ import logging
 def extract_data():
     # Define options for reading data
     table_name = "agriscrapper_data"
-    query_condition = "commodity='Dry Maize' AND wholesale!=' - ' AND retail!=' - ' AND supply_volume!=''"
+    query_condition = "wholesale!=' - ' AND retail!=' - ' AND supply_volume!=''"
 
     try:
         logging.info("loading data from database")

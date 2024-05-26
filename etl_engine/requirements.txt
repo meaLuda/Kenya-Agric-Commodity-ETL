@@ -3,3 +3,4 @@ dask
 pandas
 dask-sql[postgresql]
 psycopg2
+geopy

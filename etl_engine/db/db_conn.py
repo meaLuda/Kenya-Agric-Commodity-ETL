@@ -120,6 +120,26 @@ def create_tables():
         )
         """,
         """
+        CREATE TABLE county_goe (
+            id SERIAL PRIMARY KEY,
+            county_sk INT NOT NULL,
+            Address VARCHAR(255) NULL,
+            Latitude DECIMAL(10, 8) NULL,
+            Longitude DECIMAL(11, 8) NULL,
+            FOREIGN KEY (county_sk) REFERENCES dim_county(id)
+        )
+        """,
+        """
+        CREATE TABLE market_goe (
+            id SERIAL PRIMARY KEY,
+            market_sk INT NOT NULL,
+            Address VARCHAR(300) NULL,
+            Latitude DECIMAL(10, 8) NULL,
+            Longitude DECIMAL(11, 8) NULL,
+            FOREIGN KEY (market_sk) REFERENCES dim_market(id)
+        )
+        """,
+        """
         CREATE INDEX IF NOT EXISTS idx_fact_market_prices_date ON fact_market_prices (date_sk)
         """,
         """
