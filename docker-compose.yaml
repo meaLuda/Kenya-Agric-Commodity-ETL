@@ -23,7 +23,7 @@ services:
     container_name: data_lake_db
     image: postgres:13-alpine
     environment:
-      POSTGRES_DB: kemis_data_db,data_warehouse
+      POSTGRES_DB: kemis_data_db,kemis_analytics_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456#data_lake_db_password
     ports:

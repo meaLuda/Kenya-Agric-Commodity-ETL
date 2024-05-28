@@ -10,6 +10,6 @@ if __name__ == "__main__":
     #     create_tables()
     # except Exception as e:
     #     logging.info(e)
+    conn = connect("DataWarehouse")
     for row in extract_data():
-        conn = connect("DataWarehouse")
         transform_data_into_tables(row,conn)

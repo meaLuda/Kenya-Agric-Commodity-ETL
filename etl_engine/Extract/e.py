@@ -21,7 +21,7 @@ def extract_data():
         cursor = connection.cursor()
 
         # Execute the query and fetch all rows
-        cursor.execute(f"SELECT * FROM {table_name} WHERE {query_condition}")
+        cursor.execute(f"SELECT * FROM {table_name} WHERE {query_condition} ORDER BY id DESC")
         rows = cursor.fetchall()
 
         # Get the column names from the cursor description

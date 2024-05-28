@@ -35,6 +35,9 @@ def geocode_address(location: str, retries=3):
             logging.info(f"Output Address: {geoLoc.address}")
             logging.info(f"Output latitude: {geoLoc.latitude}")
             logging.info(f"Output longitude: {geoLoc.longitude}")
+            if geoLoc.latitude < -2.99999 or geoLoc.latitude > 2.99999:
+                # kenyas latitude is no greater than +-1 in latitude
+                return None, None, None
             return geoLoc.address, geoLoc.latitude, geoLoc.longitude
         else:
             logging.warning(f"Geocoding failed for location: {location}")
@@ -188,9 +191,13 @@ def insert_geocoded_data(conn, df):
         market_address, market_lat, market_lon = geocode_address(row['market'])
         if county_lat is not None and county_lon is not None:
             county_goe_rows.append((county_sk, county_address, county_lat, county_lon))
+        else:
+            continue
 
         if market_lat is not None and market_lon is not None:
             market_goe_rows.append((market_sk, market_address, market_lat, market_lon))
+        else:
+            continue
 
     # # Insert into county_goe table
     if county_goe_rows:
