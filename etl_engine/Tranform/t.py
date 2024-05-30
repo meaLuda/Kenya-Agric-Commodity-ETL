@@ -96,7 +96,7 @@ def transform_data_into_tables(data, conn):
     ## Insert data into the fact table
     insert_fact_table(conn, data)
 
-    ## Geocode addresses and insert into goe tables
+    ## Geocode addresses and insert into geo tables
     insert_geocoded_data(conn, data)
     time.sleep(3)
 
@@ -177,10 +177,10 @@ def insert_fact_table(conn, df):
 
 
 def insert_geocoded_data(conn, df):
-    logging.info("------------ Geocoding and Inserting into goe Tables  --------------------------")
+    logging.info("------------ Geocoding and Inserting into geo Tables  --------------------------")
 
-    county_goe_rows = []
-    market_goe_rows = []
+    county_geo_rows = []
+    market_geo_rows = []
 
     for index, row in df.iterrows():
         county_sk = get_id(conn, 'dim_county', 'county', row['county'])
@@ -190,31 +190,31 @@ def insert_geocoded_data(conn, df):
         county_address, county_lat, county_lon = geocode_address(row['county'])
         market_address, market_lat, market_lon = geocode_address(row['market'])
         if county_lat is not None and county_lon is not None:
-            county_goe_rows.append((county_sk, county_address, county_lat, county_lon))
+            county_geo_rows.append((county_sk, county_address, county_lat, county_lon))
         else:
             continue
 
         if market_lat is not None and market_lon is not None:
-            market_goe_rows.append((market_sk, market_address, market_lat, market_lon))
+            market_geo_rows.append((market_sk, market_address, market_lat, market_lon))
         else:
             continue
 
-    # # Insert into county_goe table
-    if county_goe_rows:
+    # # Insert into county_geo table
+    if county_geo_rows:
         cursor = conn.cursor()
-        placeholders = ', '.join(['%s'] * len(county_goe_rows[0]))
-        query = f"INSERT INTO county_goe (county_sk, Address, Latitude, Longitude) VALUES ({placeholders})"
-        for values in county_goe_rows:
+        placeholders = ', '.join(['%s'] * len(county_geo_rows[0]))
+        query = f"INSERT INTO county_geo (county_sk, Address, Latitude, Longitude) VALUES ({placeholders})"
+        for values in county_geo_rows:
             cursor.execute(query, values)
         conn.commit()
         cursor.close()
 
-    # # Insert into market_goe table
-    if market_goe_rows:
+    # # Insert into market_geo table
+    if market_geo_rows:
         cursor = conn.cursor()
-        placeholders = ', '.join(['%s'] * len(market_goe_rows[0]))
-        query = f"INSERT INTO market_goe (market_sk, Address, Latitude, Longitude) VALUES ({placeholders})"
-        for values in market_goe_rows:
+        placeholders = ', '.join(['%s'] * len(market_geo_rows[0]))
+        query = f"INSERT INTO market_geo (market_sk, Address, Latitude, Longitude) VALUES ({placeholders})"
+        for values in market_geo_rows:
             cursor.execute(query, values)
         conn.commit()
         cursor.close()
