@@ -3,14 +3,14 @@ import pandas as pd
 from sqlalchemy import create_engine
 import dash_bootstrap_components as dbc
 import plotly.express as px
+from ..data.load import load_data
 
-engine = create_engine('postgresql://postgres:RQaoNj7QEDxq@localhost:5433/Kemis_analytics_db')
 
 # Load data
-data = pd.read_sql_query("SELECT * FROM public.mv_market_summary_by_county_date_geo ORDER BY avg_retail_price DESC;", engine)
-data_market = pd.read_sql_query("SELECT * FROM mv_market_summary_by_market_date_geo", engine)
+data = load_data("SELECT * FROM public.mv_market_summary_by_county_date_geo ORDER BY avg_retail_price DESC LIMIT 200;")
+data_market = load_data("SELECT * FROM mv_market_summary_by_market_date_geo LIMIT 200")
 
-layout = dbc.Container([
+MAP_LAYOUTS = dbc.Container([
     html.H1("County Summary Map", className="text-center mb-5"),
     html.Hr(),
     dbc.Row([

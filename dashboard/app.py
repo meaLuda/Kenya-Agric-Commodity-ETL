@@ -14,11 +14,12 @@ import plotly.graph_objects as go
 
 
 from dash.dependencies import Input, Output
-from pages.data_sources import sources
-from pages.home import home_page,map_page,summaryReport
+from pages.home import (
+    home_page,map_page,data_page,time_series_page
+)
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],suppress_callback_exceptions=True)
+# app.config.suppress_callback_exceptions=True
 # the style arguments for the sidebar. We use position:fixed and a fixed width
 SIDEBAR_STYLE = {
     "position": "fixed",
@@ -35,26 +36,29 @@ SIDEBAR_STYLE = {
 # the styles for the main content position it to the right of the sidebar and
 # add some padding.
 CONTENT_STYLE = {
-    "margin-left": "22rem",
+    "margin-left": "20rem",
     "margin-right": "2rem",
     "padding": "2rem 1rem",
 }
 
 sidebar = html.Div(
     [
-        html.P("Kenya Agriculture Commodity Insights", className="display-4 ml-3 mt-4 mb-4"),
-        html.Hr(),
-        html.P(
-            "An extensive analytics dashboard using "
-            "data from different sources on Kenya's Agricultural Sector",
-            className="lead",
-        ),
+        html.Div([
+            html.P("Kenya Agriculture Commodity Insights", className="display-4 ml-3 mt-4 mb-4"),
+            html.Hr(),
+            html.P(
+                "An extensive analytics dashboard using "
+                "data from different sources on Kenya's Agricultural Sector",
+                className="lead",
+            ),
+        ]),
         dbc.Nav(
             [
                 dbc.NavLink("Home", href="/", active="exact"),
-                dbc.NavLink("Data Sources", href="/d_sources", active="exact"),
+                dbc.NavLink("Data View", href="/data-view", active="exact"),
+                dbc.NavLink("Time Series", href="/time-series", active="exact"),
                 dbc.NavLink("About", href="/About", active="exact"),
-                dbc.NavLink("Summary-Analytics", href="/Summary-Analytics", active="exact"),
+                # dbc.NavLink("Summary-Analytics", href="/Summary-Analytics", active="exact"),
             ],
             vertical=True,
             pills=True,
@@ -88,19 +92,18 @@ def toggle_sidebar(n):
     else:
         return SIDEBAR_STYLE
 
-# Load data
-data = pd.read_sql_query("SELECT * FROM mv_market_summary_by_county_date", engine)
-
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def render_page_content(pathname):
     if pathname == "/":
-        return map_page.layout
-    elif pathname == "/d_sources":
-        return sources.data_sources_content
+        return map_page.MAP_LAYOUTS
+    elif pathname == "/data-view":
+        return data_page.DATA_PAGE
+    elif pathname == "/time-series":
+        return time_series_page.TIME_SERIES_PAGE
     elif pathname == "/About":
         return home_page.home_page_content
-    elif pathname == "/Summary-Analytics":
-        return summaryReport.layout
+    # elif pathname == "/Summary-Analytics":
+    #     return summaryReport.layout
     # If the user tries to reach a different page, return a 404 message
     return html.Div(
         [
@@ -110,71 +113,6 @@ def render_page_content(pathname):
         ],
         className="p-3 bg-light rounded-3",
     )
-
-
-
-
-
-
-
-
-# Callback to populate commodity dropdown
-# @app.callback(
-#     Output('commodity-dropdown', 'options'),
-#     Input('commodity-dropdown', 'search_value')
-# )
-# def set_commodity_options(search_value):
-#     query = "SELECT id, commodity FROM dim_commodity"
-#     df = pd.read_sql(query, engine)
-#     options = [{'label': row['commodity'], 'value': row['id']} for idx, row in df.iterrows()]
-#     return options
-
-# # Callback to populate market dropdown
-# @app.callback(
-#     Output('market-dropdown', 'options'),
-#     Input('market-dropdown', 'search_value')
-# )
-# def set_market_options(search_value):
-#     query = "SELECT id, market FROM dim_market"
-#     df = pd.read_sql(query, engine)
-#     options = [{'label': row['market'], 'value': row['id']} for idx, row in df.iterrows()]
-#     return options
-
-# Callback to update the time series chart based on selections
-# @app.callback(
-#     Output('kenya-timeseries', 'figure'),
-#     [Input('commodity-dropdown', 'value'),
-#      Input('market-dropdown', 'value'),
-#      Input('date-picker-range', 'start_date'),
-#      Input('date-picker-range', 'end_date')]
-# )
-# def update_timeseries(commodity_id, market_id, start_date, end_date):
-#     print(f"Variables Incoming: \n Commodity id: {commodity_id} Market id: {market_id}\
-#                   \n Start date: {start_date} End date: {end_date}")
-
-#     if not commodity_id or not market_id or not start_date or not end_date:
-#         # Return an empty figure if any of the inputs are not provided
-#         return go.Figure()
-
-#     query = f"""
-#     SELECT dd.date, mp.wholesale_price, mp.retail_price, dm.market, dc.county
-#     FROM fact_market_prices mp
-#     JOIN dim_commodity dcom ON mp.commodity_sk = dcom.id
-#     JOIN dim_market dm ON mp.market_sk = dm.id
-#     JOIN dim_county dc ON mp.county_sk = dc.id
-#     JOIN dim_date dd ON mp.date_sk = dd.id
-#     WHERE dcom.id = {commodity_id} AND dm.id = {market_id} AND dd.date BETWEEN '{start_date}' AND '{end_date}'
-#     ORDER BY dd.date
-#     """
-#     print(query)
-#     df = pd.read_sql(query, engine)
-#     print(df.head())
-#     market = df['market'][0]
-#     fig = px.line(df, x='date', y=['wholesale_price', 'retail_price'],
-#                   labels={'value': 'Price', 'variable': 'Price Type'},
-#                   title=f'Time Series of Prices for Commodity {commodity_id} in Market {market}')
-#     fig.update_layout(xaxis_title='Date', yaxis_title='Price')
-#     return fig
 
 
 
