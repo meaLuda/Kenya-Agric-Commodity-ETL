@@ -6,32 +6,6 @@
 -- This design allows for efficient querying and filtering based on the dimensions, 
 -- as well as performing aggregations and analytical operations on the numerical measures in the fact table.
 
-
-
--- Fact Table
-
-CREATE TABLE fact_market_prices (
-    id SERIAL PRIMARY KEY,
-    commodity_id INT,
-    classification VARCHAR(50),
-    grade VARCHAR(50),
-    sex VARCHAR(10),
-    market_id INT,
-    wholesale_price DECIMAL(10, 2),
-    wholesale_unit DECIMAL(10, 2),
-    retail_price DECIMAL(10, 2),
-    retail_unit DECIMAL(10, 2),
-    supply_volume INT,
-    county_id INT,
-    date_id INT,
-    FOREIGN KEY (commodity_id) REFERENCES dim_commodity(commodity_id),
-    FOREIGN KEY (market_id) REFERENCES dim_market(market_id),
-    FOREIGN KEY (grade_id) REFERENCES dim_grade(grade_id),
-    FOREIGN KEY (sex_id) REFERENCES dim_sex(sex_id),
-    FOREIGN KEY (date_id) REFERENCES dim_date(date_id),
-    FOREIGN KEY (county_id) REFERENCES dim_county(county_id)
-);
-
 -- Dimensions table
 
 -- Commodity Dimension
@@ -74,4 +48,27 @@ CREATE TABLE dim_date (
     quarter INT,
     week INT,
     fiscal_year INT
+);
+
+-- Fact Table
+CREATE TABLE fact_market_prices (
+    id SERIAL PRIMARY KEY,
+    commodity_id INT,
+    classification VARCHAR(50),
+    grade_id INT,
+    sex_id INT,
+    market_id INT,
+    wholesale_price DECIMAL(10, 2),
+    wholesale_unit VARCHAR(50),
+    retail_price DECIMAL(10, 2),
+    retail_unit VARCHAR(50),
+    supply_volume INT,
+    county_id INT,
+    date_id INT,
+    FOREIGN KEY (commodity_id) REFERENCES dim_commodity(commodity_id),
+    FOREIGN KEY (market_id) REFERENCES dim_market(market_id),
+    FOREIGN KEY (grade_id) REFERENCES dim_grade(grade_id),
+    FOREIGN KEY (sex_id) REFERENCES dim_sex(sex_id),
+    FOREIGN KEY (date_id) REFERENCES dim_date(date_id),
+    FOREIGN KEY (county_id) REFERENCES dim_county(county_id)
 );

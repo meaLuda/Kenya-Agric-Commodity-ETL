@@ -1,13 +1,14 @@
 version: '3.7'
 
 services:
-  agriscrapper:
-    container_name: agriscrapper
-    build: ./agriscrapper/.
-    volumes:
-      - ./agriscrapper:/app
-    networks:
-      - agriscrapper_network
+  # NOTE: Only run when you want to save data in db.
+  # agriscrapper:
+  #   container_name: agriscrapper
+  #   build: ./agriscrapper/.
+  #   volumes:
+  #     - ./agriscrapper:/app
+  #   networks:
+  #     - agriscrapper_network
     
   dashboard:
     container_name: dashboard
@@ -18,6 +19,21 @@ services:
       - '3000:3000'
     networks:
       - agriscrapper_network
+
+  prefect:
+    container_name: prefect_data_eng
+    build: ./etl_engine/.
+    volumes:
+      - ./etl_engine:/opt/prefect/flows
+    environment:
+      - PREFECT_API_URL=http://0.0.0.0:4200/api
+      - PREFECT_SERVER_API_HOST=0.0.0.0
+      - PREFECT_SERVER_API_PORT=4200
+    ports:
+      - "4200:4200"
+
+
+
 
 
 networks:
