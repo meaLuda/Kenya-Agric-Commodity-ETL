@@ -1,101 +1,47 @@
 import dash
+from dash import dcc, html, Input, Output, State, callback
 import dash_bootstrap_components as dbc
-from dash import dcc, html
-from dash.dependencies import Input, Output
+import plotly.express as px
+import plotly.graph_objs as go
+import pandas as pd
+from sqlalchemy import create_engine
+from dash.exceptions import PreventUpdate
 
-from pages.data_sources import sources
-from pages.home import home_page
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-# the style arguments for the sidebar. We use position:fixed and a fixed width
-SIDEBAR_STYLE = {
-    "position": "fixed",
-    "top": 0,
-    "left": 0,
-    "bottom": 0,
-    "width": "20rem",
-    "padding": "2rem 1rem",
-    "background-color": "#f8f9fa",
-    "overflow": "auto",
-    "transition": "margin-left 0.5s",
-}
+# Create a connection to the analytics database
+db_url = "postgresql://postgres:RQaoNj7QEDxq@localhost:5432/kemis_analytics_db"
+engine = create_engine(db_url)
 
-# the styles for the main content position it to the right of the sidebar and
-# add some padding.
-CONTENT_STYLE = {
-    "margin-left": "22rem",
-    "margin-right": "2rem",
-    "padding": "2rem 1rem",
-}
+# Create the Dash app
+app = dash.Dash(__name__,prevent_initial_callbacks = True, external_stylesheets=[dbc.themes.BOOTSTRAP], use_pages=True)
 
-sidebar = html.Div(
-    [
-        html.H4("Kenya Agriculture Insights", className="display-4 ml-3 mt-4 mb-4"),
-        html.Hr(),
-        html.P(
-            "An extensive analytics dashboard using "
-            "data from different sources on Kenya's Agricultural Sector",
-            className="lead",
-        ),
-        dbc.Nav(
-            [
-                dbc.NavLink("Home", href="/", active="exact"),
-                dbc.NavLink("Data Sources", href="/d_sources", active="exact"),
-                dbc.NavLink("Summary Report", href="/Summary Analytics", active="exact"),
-            ],
-            vertical=True,
-            pills=True,
-        ),
+
+### ----------------> Import pages
+import pages.home
+import pages.commodity
+import pages.market
+import pages.timeseries
+
+
+navbar = dbc.NavbarSimple(
+    children=[
+        dbc.NavItem(dbc.NavLink("Home", href="/")),
+        dbc.NavItem(dbc.NavLink("Commodity Analysis", href="/commodity")),
+        # dbc.NavItem(dbc.NavLink("Market Trends", href="/market")),
+        # dbc.NavItem(dbc.NavLink("Time Series", href="/timeseries")),
     ],
-    id="sidebar",
-    style=SIDEBAR_STYLE,
+    brand="Agricultural Market Dashboard",
+    brand_href="/",
+    color="primary",
+    dark=True,
 )
 
-content = html.Div(id="page-content", style=CONTENT_STYLE)
-
-# Toggle button to show/hide sidebar
-toggle_button = html.Button(
-    html.Span(className="navbar-toggler-icon"),
-    className="navbar-toggler",
-    style={"position": "absolute", "left": "1rem", "top": "1rem"},
-    id="toggle-button",
-)
-
-app.layout = html.Div([toggle_button, dcc.Location(id="url"), sidebar, content])
+app.layout = html.Div([
+    navbar,
+    dash.page_container
+])
 
 
-# Callback to toggle sidebar
-@app.callback(
-    Output("sidebar", "style"),
-    [Input("toggle-button", "n_clicks")],
-    prevent_initial_call=True,
-)
-def toggle_sidebar(n):
-    if n and n % 2 == 1:
-        return {"margin-left": "-20rem"}
-    else:
-        return SIDEBAR_STYLE
-
-
-@app.callback(Output("page-content", "children"), [Input("url", "pathname")])
-def render_page_content(pathname):
-    if pathname == "/":
-        return home_page.home_page_content
-    elif pathname == "/d_sources":
-        return sources.data_sources_content
-    elif pathname == "/page-2":
-        return html.P("Oh cool, this is page 2!")
-    # If the user tries to reach a different page, return a 404 message
-    return html.Div(
-        [
-            html.H1("404: Not found", className="text-danger"),
-            html.Hr(),
-            html.P(f"The pathname {pathname} was not recognized..."),
-        ],
-        className="p-3 bg-light rounded-3",
-    )
-
-
-if __name__ == "__main__":
-    app.run_server(debug=True, host="0.0.0.0", port=3000)
+if __name__ == '__main__':
+    app.run_server(debug=True)
