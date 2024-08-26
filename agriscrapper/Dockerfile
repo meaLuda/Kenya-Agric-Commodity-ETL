@@ -1,19 +1,20 @@
-FROM python:3.9-slim
-
-# Install necessary packages
-RUN apt-get update
+FROM python:python:3.10-slim as builder
 
 WORKDIR /app
 
-# Copy and install Python requirements
+RUN apt-get update && apt-get install -y --no-install-recommends gcc libffi-dev && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt .
-# Copy .env file
-COPY .env .
+RUN pip install --user --no-cache-dir -r requirements.txt
 
-RUN pip install --no-cache-dir -r requirements.txt
+FROM python:python:3.10-slim
 
-# Copy your Scrapy project into the container
+WORKDIR /app
+
+COPY --from=builder /root/.local /root/.local
 COPY . .
 
-# Set the command to run your Scrapy spider
+ENV PATH=/root/.local/bin:$PATH
+
 CMD ["scrapy", "crawl", "kemis_commodities_scrapper"]
