@@ -36,9 +36,6 @@ services:
       - "4200:4200"
 
 
-
-
-
 networks:
   agriscrapper_network:
     name: agriscrapper_network
