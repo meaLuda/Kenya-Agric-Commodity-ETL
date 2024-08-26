@@ -7,6 +7,9 @@ WORKDIR /app
 
 # Copy and install Python requirements
 COPY requirements.txt .
+# Copy .env file
+COPY .env .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy your Scrapy project into the container
