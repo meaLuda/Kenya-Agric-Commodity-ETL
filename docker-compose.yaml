@@ -2,13 +2,16 @@ version: '3.7'
 
 services:
   # NOTE: Only run when you want to save data in db.
-  # agriscrapper:
-  #   container_name: agriscrapper
-  #   build: ./agriscrapper/.
-  #   volumes:
-  #     - ./agriscrapper:/app
-  #   networks:
-  #     - agriscrapper_network
+  agriscrapper:
+    container_name: agriscrapper
+    build: ./agriscrapper/.
+    volumes:
+      - ./agriscrapper:/app
+    ports:
+      - "6080:6080"
+    networks:
+      - agriscrapper_network
+
     
   dashboard:
     container_name: dashboard
