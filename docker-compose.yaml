@@ -1,42 +1,91 @@
-version: '3.7'
+version: '3.8'
 
 services:
-  # NOTE: Only run when you want to save data in db.
+  postgres:
+    image: postgres:13-alpine
+    container_name: agri_postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-kemis_data_db}
+      POSTGRES_USER: ${DB_USER:-agriuser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-agripassword}
+    volumes:
+      - ./postgres-db-volume:/var/lib/postgresql/data
+    ports:
+      - "5444:5432"
+    networks:
+      - agri_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-agriuser} -d ${DB_NAME:-agriscrapper}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   agriscrapper:
     container_name: agriscrapper
-    build: ./agriscrapper/.
+    build:
+      context: ./agriscrapper
+      dockerfile: Dockerfile
     volumes:
-      - ./agriscrapper:/app
+      - ./agriscrapper:/app:ro
     ports:
-      - "6080:6080"
+      - "6800:6800"
     networks:
-      - agriscrapper_network
+      - agri_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-    
-  dashboard:
-    container_name: dashboard
-    build: ./dashboard/.
-    volumes:
-      - ./dashboard:/app
-    ports:
-      - '3000:3000'
-    networks:
-      - agriscrapper_network
+  # dashboard:
+  #   container_name: dashboard
+  #   build:
+  #     context: ./dashboard
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./dashboard:/app:ro
+  #   ports:
+  #     - '3000:3000'
+  #   networks:
+  #     - agri_network
+  #   depends_on:
+  #     - agriscrapper
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:3000"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
 
-  prefect:
-    container_name: prefect_data_eng
-    build: ./etl_engine/.
-    volumes:
-      - ./etl_engine:/opt/prefect/flows
-    environment:
-      - PREFECT_API_URL=http://0.0.0.0:4200/api
-      - PREFECT_SERVER_API_HOST=0.0.0.0
-      - PREFECT_SERVER_API_PORT=4200
-    ports:
-      - "4200:4200"
-
+  # prefect:
+  #   container_name: prefect_data_eng
+  #   build:
+  #     context: ./etl_engine
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./etl_engine:/opt/prefect/flows:ro
+  #   environment:
+  #     - PREFECT_API_URL=http://0.0.0.0:4200/api
+  #     - PREFECT_SERVER_API_HOST=0.0.0.0
+  #     - PREFECT_SERVER_API_PORT=4200
+  #   ports:
+  #     - "4200:4200"
+  #   networks:
+  #     - agri_network
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:4200/api/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
 
 networks:
-  agriscrapper_network:
-    name: agriscrapper_network
+  agri_network:
+    name: agri_network
     driver: bridge
+
+volumes:
+  postgres_data:
+  agriscrapper_data:
+  dashboard_data:
+  prefect_data:

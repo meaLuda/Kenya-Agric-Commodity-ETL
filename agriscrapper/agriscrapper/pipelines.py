@@ -1,129 +1,94 @@
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-
-
-# useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
-import psycopg2
+from sqlalchemy import create_engine, Column, Integer, String, Table, MetaData
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import IntegrityError
 from dotenv import load_dotenv
-import os
 import os
 from os.path import join, dirname
-from dotenv import load_dotenv
 import logging
 
-
 dotenv_path = join(dirname(__file__), '.env')
-print(dotenv_path)
 load_dotenv(dotenv_path)
 
-# logg into a file
 logging.basicConfig(filename='AgriscrapperPipeline_to_db.log', level=logging.INFO)
 
-DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD")
-DATABASE_HOST = os.environ.get("DATABASE_HOST")
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
+DB_HOST = os.environ.get("DB_HOST")
+DB_PORT = os.environ.get("DB_PORT")
 
 class AgriscrapperPipeline:
     def __init__(self):
-        ## Connection Details
-        hostname = DATABASE_HOST
+        hostname = DB_HOST
         username = 'postgres'
-        password = DATABASE_PASSWORD
+        password = DB_PASSWORD
+        port = DB_PORT
         database = 'kemis_data_db'
 
-        ## Create/Connect to database
-        self.connection = psycopg2.connect(host=hostname, user=username, password=password)
-        self.connection.autocommit = True  # Set autocommit mode
-        self.cur = self.connection.cursor()
+        if not all([hostname, username, password, port, database]):
+            raise ValueError("Missing database connection details. Please check your environment variables.")
 
-        # Check if the database exists, and create it if it doesn't
-        self.cur.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s", (database,))
-        if not self.cur.fetchone():
-            self.cur.execute(f'CREATE DATABASE {database}')
+        # Create the SQLAlchemy engine
+        self.engine = create_engine(f'postgresql+pg8000://{username}:{password}@{hostname}:{port}/{database}')
+        
+        # Create a metadata instance
+        self.metadata = MetaData()
 
-        # Now connect to the newly created database
-        self.connection.close()
-        self.connection = psycopg2.connect(host=hostname, user=username, password=password, dbname=database)
-        self.cur = self.connection.cursor()
+        # Define the table
+        self.agriscrapper_data = Table('agriscrapper_data', self.metadata,
+            Column('id', Integer, primary_key=True),
+            Column('commodity', String),
+            Column('classification', String),
+            Column('grade', String),
+            Column('sex', String),
+            Column('market', String),
+            Column('wholesale', String),
+            Column('retail', String),
+            Column('supply_volume', String),
+            Column('county', String),
+            Column('date', String)
+        )
 
-        ## Create quotes table if none exists
-        self.cur.execute("""
-        CREATE TABLE IF NOT EXISTS agriscrapper_data (
-            id SERIAL PRIMARY KEY,
-            commodity TEXT NULL,
-            classification TEXT NULL,
-            grade TEXT NULL,
-            sex TEXT NULL,
-            market TEXT NULL,
-            wholesale TEXT NULL,
-            retail TEXT NULL,
-            supply_volume TEXT NULL,
-            county TEXT NULL,
-            date TEXT NULL
-        );
-        """)
-    
+        # Create the table if it doesn't exist
+        self.metadata.create_all(self.engine)
+
+        # Create a session
+        Session = sessionmaker(bind=self.engine)
+        self.session = Session()
+
     def process_item(self, item, spider):
-        # Define the select statement to check for existing entry
-        # This prevents double entry from being created by our scraper
-        select_statement = """
-            SELECT id FROM agriscrapper_data
-            WHERE commodity = %s AND classification = %s AND grade = %s AND sex = %s
-                AND market = %s AND wholesale = %s AND retail = %s AND supply_volume = %s
-                AND county = %s AND date = %s
-        """
+        try:
+            # Check if the entry already exists
+            existing_entry = self.session.query(self.agriscrapper_data).filter_by(
+                commodity=item["commodity"],
+                classification=item["classification"],
+                grade=item["grade"],
+                sex=item["sex"],
+                market=item["market"],
+                wholesale=item["wholesale"],
+                retail=item["retail"],
+                supply_volume=item["supply_volume"],
+                county=item["county"],
+                date=item["date"]
+            ).first()
 
-        # Execute the select statement with item data
-        self.cur.execute(select_statement, (
-            item["commodity"],
-            item["classification"],
-            item["grade"],
-            item["sex"],
-            item["market"],
-            item["wholesale"],
-            item["retail"],
-            item["supply_volume"],
-            item["county"],
-            item["date"]
-        ))
+            if existing_entry is None:
+                # Entry does not exist, insert new data
+                new_entry = self.agriscrapper_data.insert().values(**item)
+                self.session.execute(new_entry)
+                self.session.commit()
+                logging.info(f"Inserted new entry: {item['commodity']}")
+            else:
+                logging.info(f"Entry already exists. Skipping insertion: {item['commodity']}")
 
-        # Fetch the result of the SELECT query
-        existing_entry = self.cur.fetchone()
-
-        # Check if the entry already exists
-        if existing_entry is None:
-            # Entry does not exist, proceed with the insert statement
-            insert_statement = """
-                INSERT INTO agriscrapper_data
-                (commodity, classification, grade, sex, market, wholesale, retail, supply_volume, county, date)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """
-
-            # Execute the insert statement with item data
-            self.cur.execute(insert_statement, (
-                item["commodity"],
-                item["classification"],
-                item["grade"],
-                item["sex"],
-                item["market"],
-                item["wholesale"],
-                item["retail"],
-                item["supply_volume"],
-                item["county"],
-                item["date"]
-            ))
-
-            # Commit the changes to the database
-            self.connection.commit()
-        else:
-            ("Entry already exists. Skipping insertion.")
+        except IntegrityError:
+            self.session.rollback()
+            logging.error(f"IntegrityError: Failed to insert {item['commodity']}")
+        except Exception as e:
+            self.session.rollback()
+            logging.error(f"Error processing item: {str(e)}")
 
         return item
 
     def close_spider(self, spider):
-        # Close the cursor and connection
-        self.cur.close()
-        self.connection.close()
-
+        # Close the session
+        self.session.close()

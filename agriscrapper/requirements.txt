@@ -1,3 +1,4 @@
 scrapy
-psycopg2-binary
+sqlalchemy
 python-dotenv
+pg8000
